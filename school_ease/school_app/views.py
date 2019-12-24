@@ -4,8 +4,39 @@ from .models import Tutor,School ,Coaching
 from django.http import JsonResponse
 from .serializers import TutorSerializer,SchoolSerializer,CoachingSerializer
 from rest_framework import generics
+from django.http import HttpResponseRedirect
+from rest_framework import viewsets
+from django.urls import reverse
+from django.contrib.auth import authenticate,login,logout
 
 from rest_framework import viewsets
+
+
+def user_login(request):
+    context = {}
+    if request.method =="POST":
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username = username , password = password)
+        if user:
+            login(request, user)
+            return HttpResponseRedirect(reverse('user success'))
+
+        else:
+            context["error"]: "Provide valid credentials !!"
+            return render(request, "auth/login.html", context)
+    else:
+        return render(request, "auth/login.html", context)
+
+def success(request):
+    context = {}
+    context['user'] = request.user
+    return render(request , 'auth/success.html', context)
+
+def user_logout(request):
+    if request.method == "POST":
+        logout(request)
+        return HttpResponseRedirect(reverse("user_login "))
 
 
 class TutorViewSet(viewsets.ModelViewSet):
